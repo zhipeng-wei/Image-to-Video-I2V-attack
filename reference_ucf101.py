@@ -154,9 +154,6 @@ if __name__ == '__main__':
     info_df.to_csv(os.path.join(args.adv_path, 'results_all_models_prediction.csv'), index=False)
     with open(os.path.join(args.adv_path, 'top1_acc_all_models.json'), 'w') as opt:
         json.dump(model_val_acc, opt)
-    # delete the generated npy files.
-    # command = os.path.join(args.adv_path, '*.npy')
-    # os.system('rm {}'.format(command))
 
     
 

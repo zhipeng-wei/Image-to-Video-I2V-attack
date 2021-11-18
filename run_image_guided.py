@@ -51,7 +51,7 @@ if __name__ == '__main__':
             os.system(ImageGuidedFMDirection_Adam_attack_run.format(gpu=args.gpu, step=step, step_size=step_size, batch_nums=1, batch_index=1, batch_size=1))
             os.system(ImageGuidedFMDirection_Adam_reference_run.format(gpu=args.gpu, step=step, step_size=step_size))
 
-    # ablation study for attacked layer (Table 2 and Figure 6)
+    # ablation study for attacked layer (Table 2 and Figure 5)
     depths = [1,2,3,4]
     image_models = ['resnet', 'squeezenet', 'vgg', 'alexnet']
     for image_model in image_models:
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             os.system(Aba_layer_ImageGuidedFMDirection_Adam_attack_run.format(gpu=args.gpu, depth=depth, image_model=image_model))
             os.system(Aba_layer_ImageGuidedFMDirection_Adam_reference_run.format(gpu=args.gpu, image_model=image_model, depth=depth))
 
-    # performance comparison for kinetics-400 (Figure 5a)
+    # performance comparison for kinetics-400 (Table 3)
     step = 60
     step_size = 0.005
     image_models = ['squeezenet', 'vgg', 'alexnet', 'resnet'] 
@@ -76,11 +76,11 @@ if __name__ == '__main__':
         os.system(Per_Com_ImageGuidedStd_Adam_reference_run.format(gpu=args.gpu, image_model=image_model, depth=depth))
 
     # ENS-I2V attack
-    os.system(Per_Com_ImageGuidedFML2_Adam_MultiModels_attack_run.format(gpu=args.gpu, image_model=image_model, depth=depth))
-    os.system(Per_Com_ImageGuidedFML2_Adam_MultiModels_reference_run.format(gpu=args.gpu, image_model=image_model, depth=depth))
+    os.system(Per_Com_ImageGuidedFML2_Adam_MultiModels_attack_run.format(gpu=args.gpu))
+    os.system(Per_Com_ImageGuidedFML2_Adam_MultiModels_reference_run.format(gpu=args.gpu))
 
-    # performance compasison for ucf101 (Figure 5b)
-    step = 5
+    # performance compasison for ucf101 (Table 4)
+    step = 60
     step_size = 0.005
     image_models = ['resnet', 'squeezenet', 'vgg', 'alexnet'] # '', 
     for image_model in image_models:
@@ -96,8 +96,8 @@ if __name__ == '__main__':
         os.system(Per_Com_UCF_ImageGuidedStd_Adam_reference_run.format(gpu=args.gpu, image_model=image_model, depth=depth))
         
     # ENS-I2V attack
-    os.system(Per_Com_UCF_ImageGuidedFML2_Adam_MultiModels_attack_run.format(gpu=args.gpu, image_model=image_model, depth=depth))
-    os.system(Per_Com_UCF_ImageGuidedFML2_Adam_MultiModels_reference_run.format(gpu=args.gpu, image_model=image_model, depth=depth))
+    os.system(Per_Com_UCF_ImageGuidedFML2_Adam_MultiModels_attack_run.format(gpu=args.gpu))
+    os.system(Per_Com_UCF_ImageGuidedFML2_Adam_MultiModels_reference_run.format(gpu=args.gpu))
     
 
 

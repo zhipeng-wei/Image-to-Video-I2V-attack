@@ -233,38 +233,6 @@ class Attack(object):
 
         return images
 
-class PGD(Attack):
-    def __init__(self, model, epsilon=16/255, step_size=2, steps=10):
-        super(PGD, self).__init__("PGD", model)
-        self.epsilon = epsilon
-        self.step_size = step_size
-        self.steps = steps
-
-    def forward(self, videos, labels):
-        videos = videos.to(self.device)
-        labels = labels.to(self.device)
-        unnorm_videos = self._transform_video(videos.clone().detach(), mode='back') # [0, 1]
-
-        loss = nn.CrossEntropyLoss()
-        adv_videos = videos.clone().detach()
-
-        for i in range(self.steps):
-            adv_videos.requires_grad = True
-            outputs = self.model(adv_videos)
-
-            cost = self._targeted*loss(outputs, labels).to(self.device)
-
-            grad = torch.autograd.grad(cost, adv_videos,
-                                       retain_graph=False, create_graph=False)[0]
-
-            adv_videos = self._transform_video(adv_videos.detach(), mode='back') # [0, 1]
-            adv_videos = adv_videos + self.step_size*grad.sign()
-            delta = torch.clamp(adv_videos - unnorm_videos, min=-self.eps, max=self.eps)
-            adv_videos = torch.clamp(unnorm_videos + delta, min=0, max=1).detach()
-            adv_videos = self._transform_video(adv_videos, mode='forward') # norm
-
-        return adv_videos
-
 class FGSM(Attack):
     '''Fast Gradient Sign Method'''
     def __init__(self, model, steps=None, epsilon=16/255):
