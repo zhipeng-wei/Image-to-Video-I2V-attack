@@ -158,4 +158,4 @@ dependencies:
     - tqdm==4.62.3
     - urllib3==1.26.6
     - yacs==0.1.8
-prefix: /home/zhipeng/miniconda3/envs/transfer
+prefix: None
