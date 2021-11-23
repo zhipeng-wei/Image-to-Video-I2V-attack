@@ -14,7 +14,7 @@ NVIDIA-SMI 430.14       Driver Version: 430.14       CUDA Version: 10.2
 For Kinetics-400, download config files from [gluon](https://cv.gluon.ai/model_zoo/action_recognition.html).  Models include i3d_nl5_resnet50_v1_kinetics400, i3d_nl5_resnet101_v1_kinetics400, slowfast_8x8_resnet50_kinetics400, slowfast_8x8_resnet101_kinetics400, tpn_resnet50_f32s2_kinetics400, tpn_resnet101_f32s2_kinetics400.
 After that, change the CONFIG_ROOT of utils.py into your custom path. We use pretrained models on Kinetics-400 from gluon to conduct experiments.
 
-For UCF-101, we fine-tune these models on UCF-101. Download checkpoint files from [here](https://drive.google.com/drive/folders/10KOlWdi5bsV9001uL4Bn1T48m9hkgsZ2) and specify UCF_CKPT_PATH of utils.py.
+For UCF-101, we fine-tune these models on UCF-101. Download checkpoint files from here (due to the double blind review, we will provide the link after the paper is accepted) and specify UCF_CKPT_PATH of utils.py.
 
 ### Dataset
 Download Kinetics-400 dataset and UCF-101 dataset and set OPT_PATH of utils.py to specify the output path.

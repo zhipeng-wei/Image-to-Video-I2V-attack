@@ -4,7 +4,7 @@ import torch
 
 # config info of video models
 # refer to https://cv.gluon.ai/model_zoo/action_recognition.html
-CONFIG_ROOT = '/DATACENTER/zhipeng/Kinetics/Config' # <need to specify>
+CONFIG_ROOT = '' # <need to specify>
 CONFIG_PATHS = {
     'i3d_resnet50': os.path.join(CONFIG_ROOT, 'i3d_nl5_resnet50_v1_kinetics400.yaml'),
     'i3d_resnet101': os.path.join(CONFIG_ROOT, 'i3d_nl5_resnet101_v1_kinetics400.yaml'),
@@ -15,17 +15,17 @@ CONFIG_PATHS = {
     }
 
 # data info
-UCF_IMAGE_ROOT = '/DATACENTER/zhipeng/UCF101/UCF101-jpg' # <need to specify>
+UCF_IMAGE_ROOT = '' # <need to specify>
 
 # save info
-OPT_PATH = '/DATACENTER/nvme/zhipeng/test' # <need to specify>
+OPT_PATH = '' # <need to specify>
 
 # checkpoints path for ucf101
-UCF_CKPT_PATH = '/DATACENTER/zhipeng/UCF101/checkpoint/' # <need to specify>
+UCF_CKPT_PATH = '' # <need to specify>
 
 def change_cfg(cfg, batch_size, random):
     # modify video paths and pretrain setting.
-    cfg.CONFIG.DATA.VAL_DATA_PATH = '/DATACENTER/zhipeng/Kinetics/Kinetics/videos/val' # <need to specify>
+    cfg.CONFIG.DATA.VAL_DATA_PATH = '' # <need to specify>
     cfg.CONFIG.DATA.VAL_ANNO_PATH = './kinetics400_attack_samples.csv' # selected 400 classified correct.
     cfg.CONFIG.MODEL.PRETRAINED = True
     cfg.CONFIG.VAL.BATCH_SIZE = batch_size
