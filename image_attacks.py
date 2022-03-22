@@ -369,11 +369,11 @@ class ImageGuidedFML2_Adam_MultiModels(Attack):
     parameters:
         depth: {1,2,3,4}
     '''
-    def __init__(self, model_name_lists, depths, epsilon=16/255, steps=10):
+    def __init__(self, model_name_lists, depths, epsilon=16/255, steps=60):
         super(ImageGuidedFML2_Adam_MultiModels, self).__init__("ImageGuidedFML2_Adam_MultiModels")
         self.epsilon = epsilon
         self.steps = steps
-        self.step_size = 0.004
+        self.step_size = 0.005
         self.loss_info = {}
         self.depths = depths
         self.models = get_models(model_name_lists)
