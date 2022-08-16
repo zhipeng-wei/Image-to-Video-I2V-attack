@@ -681,3 +681,135 @@ class TIFGSM3D(Attack):
             adv_videos = self._transform_video(adv_videos, mode='forward') # norm
 
         return adv_videos
+    
+class TAP(Attack):
+    '''Transferable Adversarial Perturbations
+    params = {
+        'kernlen': 3,
+        'temporal_kernlen':3,
+        'eta': 1e3,
+        'conv3d': True
+    }
+    '''
+    def __init__(self, model, params, epsilon=16/255, steps=10):
+        super(TAP, self).__init__("TAP", model)
+        self.epsilon = epsilon
+        self.steps = steps
+        self.step_size = self.epsilon / self.steps
+
+        for name, value in params.items():
+            setattr(self, name, value)
+
+        kernel = self._initial_kernel_uniform(self.kernlen).astype(np.float32) # (3,3)
+        stack_kernel = np.stack([kernel, kernel, kernel]) # (3,3,3)
+        self.stack_2d_kernel = torch.from_numpy(np.expand_dims(stack_kernel, 1)).to(self.device) # 3,1,3,3
+
+        kernel_3d = self._initial_kernel_uniform_3d(self.kernlen, self.temporal_kernlen) # [t,h,h]
+        stack_kernel_3d = np.stack([kernel_3d, kernel_3d, kernel_3d]) # (3,t,h,h)
+        self.stack_3d_kernel = torch.from_numpy(np.expand_dims(stack_kernel_3d, 1)).to(self.device) # 3,1,t,h,h
+
+        self._activation_hook()
+        
+    def _initial_kernel_uniform(self, kernlen):
+        kern1d = np.ones(kernlen)
+        kernel_raw = np.outer(kern1d, kern1d)
+        kernel = kernel_raw / kernel_raw.sum()
+        return kernel
+
+    def _initial_kernel_uniform_3d(self, kernlen, temporal_kernel):
+        kern3d = np.ones((temporal_kernel, kernlen, kernlen))
+        kern3d = kern3d / kern3d.sum()
+        return kern3d
+
+    def _conv2d_frames(self, perts):
+        frames = perts.shape[2]
+        out_perts = torch.zeros_like(perts)
+        for i in range(frames):
+            this_perts = perts[:,:,i]
+            out_pert = nn.functional.conv2d(this_perts, self.stack_2d_kernel, groups=3, stride=1, padding=[int((self.kernlen-1)/2), int((self.kernlen-1)/2)])
+            out_perts[:,:,i] = out_pert
+        return torch.sum(torch.abs(out_perts))
+
+    def _conv3d_frames(self, perts):
+        out_perts = nn.functional.conv3d(perts, self.stack_3d_kernel, groups=3, stride=1, padding=[int((self.temporal_kernlen-1)/2), int((self.kernlen-1)/2), int((self.kernlen-1)/2)])
+        return torch.sum(torch.abs(out_perts))
+
+    def _find_target_layer(self):
+        if 'i3d' in self.model_type:
+            return [self.model.res_layers._modules['0'], self.model.res_layers._modules['1']]
+        elif 'slowfast' in self.model_type:
+            return [self.model._modules['slow_res2'], self.model._modules['slow_res3'], self.model._modules['fast_res2'], self.model._modules['fast_res3']] #[b,2048, 8, 7, 7], [b, 256, 32, 7, 7]
+        elif 'tpn' in self.model_type:
+            return [self.model.layer1, self.model.layer2]
+
+    def _activation_hook(self):
+        self.activations = dict()
+        self.activations['value'] = []
+        def forward_hook(module, input, output):
+            self.activations['value'] += [output]
+            return None
+        target_layer = self._find_target_layer()
+        if isinstance(target_layer, list):
+            for i in target_layer:
+                i.register_forward_hook(forward_hook)
+        else:        
+            target_layer.register_forward_hook(forward_hook)
+
+    def forward(self, videos, labels):
+        r"""
+        Overridden.
+        """
+        batch_size = videos.shape[0]
+        self.loss_info = {}
+        self.stack_3d_kernel = self.stack_3d_kernel.type(videos.dtype)
+        videos = videos.to(self.device)
+        labels = labels.to(self.device)
+
+        self.activations = dict()
+        self.activations['value'] = []
+        outputs = self.model(videos)
+        ori_feature_map = self.activations['value']
+
+        loss = nn.CrossEntropyLoss()
+        unnorm_videos = self._transform_video(videos.clone().detach(), mode='back') # [0, 1]
+        adv_videos = videos.clone().detach()
+
+        for i in range(self.steps):
+            self.activations = dict()
+            self.activations['value'] = []
+            adv_videos.requires_grad = True
+            outputs = self.model(adv_videos)
+
+            # CE loss
+            cost1 = self._targeted*loss(outputs, labels).to(self.device)
+
+            # l2 distance
+            # this_feature_map = self._feature_map(adv_videos, True, False, labels)
+            feat_distance = []
+            for i,j in zip(self.activations['value'], ori_feature_map):
+                this_distance = torch.norm((torch.sign(i) * torch.sqrt(torch.abs(i))).reshape(batch_size, -1) - (torch.sign(j) * torch.sqrt(torch.abs(j))).reshape(batch_size, -1), p=2, dim=1)
+                feat_distance.append(this_distance)
+            cost2 = torch.sum(torch.stack(feat_distance), 0)
+
+            # L2 norm
+            perts = self._transform_perts(adv_videos - videos).to(self.device)
+            if self.conv3d:
+                reg_cost = self._conv3d_frames(perts)
+            else:
+                reg_cost = self._conv2d_frames(perts)
+
+            cost = cost1 + 1e3 * reg_cost + 0.05 * cost2
+
+            grad = torch.autograd.grad(cost, adv_videos, 
+                                       retain_graph=False, create_graph=False)[0]
+
+            adv_videos = self._transform_video(adv_videos.detach(), mode='back') # [0, 1]
+            adv_videos = adv_videos + self.step_size*grad.sign()
+            delta = torch.clamp(adv_videos - unnorm_videos, min=-self.epsilon, max=self.epsilon)
+            adv_videos = torch.clamp(unnorm_videos + delta, min=0, max=1).detach()
+            adv_videos = self._transform_video(adv_videos, mode='forward') # norm
+            self.loss_info[i] = {'ce loss': cost1.detach().cpu().numpy(), 
+                        'reg_cost': reg_cost.detach().cpu().numpy(),
+                        'distance': cost2.detach().cpu().numpy()}
+        return adv_videos
+
