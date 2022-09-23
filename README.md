@@ -1,5 +1,5 @@
 # CVPR 2022
-Cross-Modal Transferable Adversarial Attacks from Images to Videos \[[pdf]\](https://openaccess.thecvf.com/content/CVPR2022/papers/Wei_Cross-Modal_Transferable_Adversarial_Attacks_From_Images_to_Videos_CVPR_2022_paper.pdf)
+Cross-Modal Transferable Adversarial Attacks from Images to Videos [pdf](https://openaccess.thecvf.com/content/CVPR2022/papers/Wei_Cross-Modal_Transferable_Adversarial_Attacks_From_Images_to_Videos_CVPR_2022_paper.pdf)
 
 # Citation
 If you use our method for attacks in your research, please consider citing
