@@ -1,7 +1,20 @@
-# CVPR 2022
-Cross-Modal Transferable Adversarial Attacks from Images to Videos [pdf](https://openaccess.thecvf.com/content/CVPR2022/papers/Wei_Cross-Modal_Transferable_Adversarial_Attacks_From_Images_to_Videos_CVPR_2022_paper.pdf)
+<div align="center">
 
-# Citation
+<h1><a href="https://openaccess.thecvf.com/content/CVPR2022/papers/Wei_Cross-Modal_Transferable_Adversarial_Attacks_From_Images_to_Videos_CVPR_2022_paper.pdf">Cross-Modal Transferable Adversarial Attacks from Images to Videos</a></h1>
+
+**CVPR 2022**
+
+</div>
+
+<div align="center">
+
+<h1><a href="https://ieeexplore.ieee.org/abstract/document/10375740">Adaptive Cross-Modal Transferable Adversarial Attacks From Images to Videos</a></h1>
+
+**IEEE Transactions on Pattern Analysis and Machine Intelligence ( Volume: 46, Issue: 5, May 2024)**
+
+**[Zhipeng Wei](https://zhipeng-wei.github.io/), [Jingjing Chen](https://fvl.fudan.edu.cn/people/jingjingchen), [Zuxuan Wu](https://zxwu.azurewebsites.net/), [Yu-Gang Jiang](https://fvl.fudan.edu.cn/people/yugangjiang/)**
+</div>
+
 If you use our method for attacks in your research, please consider citing
 ```
 @inproceedings{wei2022cross,
@@ -11,7 +24,21 @@ If you use our method for attacks in your research, please consider citing
   pages={15064--15073},
   year={2022}
 }
+@ARTICLE{10375740,
+  author={Wei, Zhipeng and Chen, Jingjing and Wu, Zuxuan and Jiang, Yu-Gang},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
+  title={Adaptive Cross-Modal Transferable Adversarial Attacks From Images to Videos}, 
+  year={2024},
+  volume={46},
+  number={5},
+  pages={3772-3783},
+  keywords={Videos;Adaptation models;Perturbation methods;Feature extraction;Computational modeling;Glass box;Closed box;Cross-modal attack;transferable attack},
+  doi={10.1109/TPAMI.2023.3347835}}
 ```
+
+# Introduction
+We proposed the Image To Video (I2V) attack (CVPR paper), which generates adversarial video examples by optimizing against pretrained image models to deceive video models. Specifically, I2V reduces the cosine similarity between adversarial and benign features in the intermediate layers of image models for each video frame.  
+Moreover, I2V can be easily extended to simultaneously perturb multi-layer features extracted from an ensemble of image models (TPAMI Paper). To efficiently integrate various features, we introduce an adaptive approach to re-weight the contributions of each layer based on its cosine similarity values of the previous attack step.
 
 # Python Environment.
 We provide I2V_attack-env.yml to recover the used environment.
